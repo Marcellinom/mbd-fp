@@ -9,6 +9,7 @@ use App\Models\User\UserId;
 use DateTime;
 use Exception;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 class SqlUserRepository
 {
@@ -32,39 +33,32 @@ class SqlUserRepository
         );
     }
 
-    public function persist(User $user): void
+    public function create(User $user, string $password): void
     {
-        DB::select(
-            "begin tran
-                if exists (select * from user with (updlock,serializable) where id = ?)
-                begin
-                   update table set
-                   id = ?, role_id = ?, region_id = ?, tanggal_lahir = ?, name = ?, username = ?
-                   where id = ?
-                end
-                else
-                begin
-                   insert into table (id, role_id, region_id, tanggal_lahir, name, username)
-                   values (?, ?, ?, ?, ?, ?)
-                end
-                commit tran
-               ",
-            [
-                $user->getId()->toString(),
-                $user->getId()->toString(),
-                $user->getRoleId()->toString(),
-                $user->getRegionId()->toString(),
-                $user->getTanggalLahir(),
-                $user->getName(),
-                $user->getUsername(),
-                $user->getId()->toString(),
-                $user->getId()->toString(),
-                $user->getRoleId()->toString(),
-                $user->getRegionId()->toString(),
-                $user->getTanggalLahir(),
-                $user->getName(),
-                $user->getUsername(),
-            ]
-        );
+        DB::insert("insert into user (id, role_id, region_id, tanggal_lahir, name, username, password)
+                    values (?,?,?,?,?,?)", [
+            $user->getId()->toString(),
+            $user->getRegionId()->toString(),
+            $user->getRoleId()->toString(),
+            $user->getName(),
+            $user->getTanggalLahir(),
+            $user->getUsername(),
+            Hash::make($password)
+        ]);
+    }
+
+    public function update(User $user): void
+    {
+        DB::insert("update user
+                    set id = ?, role_id = ?, region_id = ?, tanggal_lahir = ?, name = ?, username = ?
+                    where id = ?", [
+            $user->getId()->toString(),
+            $user->getRegionId()->toString(),
+            $user->getRoleId()->toString(),
+            $user->getName(),
+            $user->getTanggalLahir(),
+            $user->getUsername(),
+            $user->getId()->toString(),
+        ]);
     }
 }
