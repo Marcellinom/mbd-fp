@@ -17,7 +17,7 @@ class CreateUserTable extends Migration
             $table->uuid('id')->primary();
             $table->uuid('role_id');
             $table->uuid('region_id');
-            $table->date('tanggal_lahir');
+            $table->timestamp('tanggal_lahir');
             $table->string('name');
             $table->string('username')->index();
             $table->string('password');
