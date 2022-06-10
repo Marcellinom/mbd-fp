@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\HomeController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -21,22 +22,25 @@ Route::get('/login', function () {
     return view('login');
 });
 
+Route::post('/login', [HomeController::class, 'login']);
+
 Route::get('/register', function () {
     return view('register');
 });
 
-Route::get('/event', function () {
-    return view('event');
-});
-Route::get('/create-event', function () {
-    return view('create-event');
-});
+Route::post('register', [HomeController::class, 'registerUser']);
+
+Route::get('/event', [HomeController::class, 'redirectToEventOrganizer']);
+
+Route::get('/create_event', [HomeController::class, 'getCreateEvent']);
+Route::post('/create_event', [HomeController::class, 'postCreateEvent']);
+
 
 Route::get('/volunteer', function () {
     return view('volunteer');
 });
 
-Route::get('/supplier', function (){
+Route::get('/supplier', function () {
     return view('supplier');
 });
 // Auth::routes();

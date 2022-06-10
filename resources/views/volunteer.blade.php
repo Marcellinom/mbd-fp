@@ -13,27 +13,22 @@
 
         <table class="table container">
             <thead>
-                <tr>
-                    <th>Nama Event</th>
-                    <th>Jumlah Volunteer</th>
-                    <th>Aksi</th>
-                </tr>
+            <tr>
+                <th>Nama Event</th>
+                <th>Jumlah Volunteer</th>
+                <th>Aksi</th>
+            </tr>
             </thead>
             <tbody>
+            @foreach($events as $event)
                 <tr>
-            
-                    {{-- @foreach($drivers as $driver) --}}
-                    {{-- <td>{{ $driver->name }}</td> --}}
-                    {{-- @endforeach --}}
+                    <td>{{ $event->name }}</td>
+                    <td>{{ $event->participant }}</td>
+
                 </tr>
-                <tr>
-                
-                    {{-- @foreach($drivers as $driver) --}}
-                    {{-- <td>{{ $driver->origin }}</td> --}}
-                    {{-- @endforeach --}}
-                </tr>
+            @endforeach
             </tbody>
-        </table>        
+        </table>
     </div>
 </body>
 </html>

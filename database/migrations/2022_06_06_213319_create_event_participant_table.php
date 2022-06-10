@@ -16,7 +16,6 @@ class CreateEventParticipantTable extends Migration
         Schema::create('event_participant', function (Blueprint $table) {
             $table->uuid('event_id')->index();
             $table->uuid('user_id');
-            $table->boolean('dari_luar_daerah');
 
             $table->foreign('user_id')->references('id')->on('user');
             $table->foreign('event_id')->references('id')->on('event');

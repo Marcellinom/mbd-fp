@@ -16,14 +16,11 @@ class CreateUserTable extends Migration
         Schema::create('user', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('role_id');
-            $table->uuid('region_id');
-            $table->timestamp('tanggal_lahir');
-            $table->string('name');
-            $table->string('username')->index();
+            $table->string('name')->unique();
+            $table->string('username')->unique()->index();
             $table->string('password');
 
             $table->foreign('role_id')->references('id')->on('role');
-            $table->foreign('region_id')->references('id')->on('region');
         });
     }
 

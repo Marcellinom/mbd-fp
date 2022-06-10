@@ -17,12 +17,12 @@ class CreateTransactionTable extends Migration
             $table->uuid('id')->primary();
             $table->enum('transaction_type', ['Tree Supplied', 'Tree Transported']);
             $table->uuid('sender');
-            $table->uuid('event_receiver');
+            $table->uuid('ajuan_event_receiver');
             $table->float('price');
             $table->float('amount');
 
             $table->foreign('sender')->references('id')->on('user');
-            $table->foreign('event_receiver')->references('id')->on('event');
+            $table->foreign('ajuan_event_receiver')->references('id')->on('ajuan');
         });
     }
 
