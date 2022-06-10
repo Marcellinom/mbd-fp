@@ -36,13 +36,11 @@ Route::get('/create_event', [HomeController::class, 'getCreateEvent']);
 Route::post('/create_event', [HomeController::class, 'postCreateEvent']);
 
 
-Route::get('/volunteer', function () {
-    return view('volunteer');
-});
+Route::get('/volunteer', [HomeController::class, 'redirectToVolunteer']);
+Route::post('/volunteer_daftar', [HomeController::class, 'volunteerDaftar']);
 
-Route::get('/supplier', function () {
-    return view('supplier');
-});
+Route::get('/supplier', [HomeController::class, 'redirectToSupplier']);
+Route::post('/supply_pohon', [HomeController::class, 'supplyPohon']);
 // Auth::routes();
 
 // Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');

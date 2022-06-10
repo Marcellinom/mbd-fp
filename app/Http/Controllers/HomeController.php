@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Ajuan\AjuanStatus;
 use App\Models\Role\RoleType;
+use App\Models\Transaction\TransactionType;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -65,24 +66,30 @@ class HomeController extends Controller
         Session::put('user_id', $user->user_id);
         switch ($user->role_type) {
             case RoleType::VOLUNTEER:
-                return $this->redirectToVolunteer($user);
+                return redirect('volunteer');
             case RoleType::EVENT_ORGANIZER:
                 return redirect('event');
             case RoleType::SUPPLIER:
-                return $this->redirectToSupplier($user);
+                return redirect('supplier');
             case RoleType::TRANSPORTER:
                 return $this->redirectToTransporter($user);
         }
         return redirect('login');
     }
 
-    private function redirectToVolunteer(object $row)
+    public function redirectToVolunteer()
     {
-        $row = DB::select("
+        $events = DB::select("
             select id, nama_event, (
                 select count(1) from applied_user_ajuan where ajuan_id = id
             ) as participant from ajuan
         ");
+        $applied_events = DB::table('applied_user_ajuan')->where('user_id', Session::get('user_id'))->get();
+        $applied_event_ids = [];
+        foreach ($applied_events as $applied_event) {
+            $applied_event_ids[] = $applied_event->ajuan_id;
+        }
+        return view('volunteer', compact('events', 'applied_event_ids'));
     }
 
     public function redirectToEventOrganizer()
@@ -105,12 +112,56 @@ class HomeController extends Controller
         return view('event', compact('rows'));
     }
 
-    private function redirectToSupplier(object $row)
+    public function volunteerDaftar(Request $request)
     {
-
+        DB::beginTransaction();
+        try {
+            DB::insert("
+                insert into applied_user_ajuan (ajuan_id, user_id)
+                values (?, ?)
+            ", [$request->input('ajuan_id'), $request->input('user_id')]);
+        } catch (Throwable $exception) {
+            DB::rollBack();
+            throw $exception;
+        }
+        DB::commit();
+        return redirect('volunteer');
     }
 
-    private function redirectToTransporter(object $row)
+    public function redirectToSupplier()
+    {
+        $rows = DB::select("
+            select a.id, a.nama_event, a.minimal_tanaman, (
+                select coalesce(sum(amount), 0) from transaction
+                where ajuan_event_receiver = a.id
+            ) as pohon
+            from ajuan a
+        ");
+        return view('supplier', compact('rows'));
+    }
+
+    public function supplyPohon(Request $request)
+    {
+        DB::beginTransaction();
+        try {
+            DB::insert("
+                insert into transaction (id, transaction_type, sender, ajuan_event_receiver, price, amount)
+                values (?, ?, ?, ?, ?, ?)
+            ", [Uuid::uuid4()->toString(), TransactionType::TREE_SUPPLIED,
+                $request->input('user_id'),
+                $request->input('ajuan_id'),
+                $request->input('harga_pohon'),
+                $request->input('jumlah_pohon_disupply')
+            ]);
+        } catch (Throwable $exception) {
+            DB::rollBack();
+            throw $exception;
+        }
+        DB::commit();
+        return redirect('supplier');
+    }
+
+    public function redirectToTransporter(object $row)
     {
 
     }
@@ -127,9 +178,9 @@ class HomeController extends Controller
         try {
             DB::insert("
                 insert into ajuan (
-                                   id, nama_event, user_id_pengaju, region_id, status,
-                                   minimal_volunteer, minimal_tanaman, time_limit, is_eligible
-                                   )
+                   id, nama_event, user_id_pengaju, region_id, status,
+                   minimal_volunteer, minimal_tanaman, time_limit, is_eligible
+                )
                 values (?, ?, ?, ?, ?, ?, ?, ?, ?)
             ", [
                 Uuid::uuid4()->toString(),
